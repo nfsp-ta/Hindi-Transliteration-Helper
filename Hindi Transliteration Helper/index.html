@@ -48,9 +48,40 @@
     </ul>
   </div>
 </nav>
+<br />
+<div id="article"></div>
   </div>
+  
+  <style>
+	.pair {
+		display: inline-block;
+		text-align: center;
+		margin: 5px;
+	}
+	.en {
+		width: 100%;
+		text-align: center;
+	}
+	.hio {
+		display: none;
+	}
+	.txt {
+		height: 1.25em;
+		min-height: 1.25em;
+		line-height: 1.25;
+	}
+	.edt {
+		text-align: center;
+		display: none;
+		align-self: center;
+		width: 1em;
+		border: none;
+		padding: 0;
+	}
+  </style>
 
   <script>
+  var article = [];
   $(document).ready(function(){
   
 	$(".loadLink").on("click", function(evt) {
@@ -99,11 +130,106 @@
 		checked = (checked == "Y" ? "N" : "Y");
 	});
 	
-	function loadHindi(txt) {
-		debugger;
-	}
+	//loadHindi("हे इसराएल सुन, हमारा परमेश्‍वर यहोवा एक ही यहोवा है। तू अपने परमेश्‍वर यहोवा से पूरे दिल, पूरी जान और पूरी ताकत से प्यार करना।—व्यव. 6:4, 5.\r\n\r\n“यहोवा हमारा परमेश्‍वर है, यहोवा एक ही है।” क्या ही दमदार बात!");
 	
   });
+	
+	function loadHindi(txt) {
+		txt = txt.replace(/—/g, " —");
+		txt = txt.replace(/\n/g, " <br> ");
+		var ary = txt.split(" ");
+		var rgx = /[^\u0900-\u0963\u0965-\u097F]*/gi
+		ary.forEach(function(e,i){
+			article.push({i: i, h: e, hw: e.replace(rgx,"") , e: ""});
+		});
+		updateArticle();
+		$(".dlgDiv").dialog("close");
+	}
+	
+	function updateArticle() {
+		$("#article").empty();
+		$("#article").append($("<p style='display: flex; flex-wrap: wrap;'>"));
+		article.forEach(function(e){
+			if (e.h == "<br>") {
+				$("#article").append($("<p style='display: flex; flex-wrap: wrap;'>"));
+			} else {
+				$("#article").find("p").last().append(
+					$("<div class='pair'>")
+						.append($("<div class='hi'>").append(e.h))
+						.append($("<div class='hio'>").append(e.hw))
+						.append(
+							$("<div class='en'>")
+								.append($("<div class='txt'>").append(e.e))
+								.append($("<input class='edt'>")))
+				);
+			}
+		});
+	}
+	
+	function editField(element) {
+		$(".edt").hide();
+		$(".txt").show();
+		var edt = $(element).find(".edt");
+		var txt = $(element).find(".txt");
+		txt.hide();
+		edt.val(txt.html());
+		edt.show();		
+		edt.focus();
+		edt.select();
+		edt.one("focusout", function() {
+			var origHindi = edt.closest(".pair").find(".hio").html();
+			var enTrns = edt.val();
+			txt.html(enTrns);
+			$(".pair").each(function(i,e) {
+				if ($(e).find(".hio").html() == origHindi)
+					$(e).find(".txt").html(enTrns);
+			});
+		});
+		edt.trigger("input");
+	}
+	
+	$("body").on("click", ".en", function (evt) {
+		editField(this);
+	});
+	
+	
+	$.fn.textWidth = function(text, font) {
+		if (!$.fn.textWidth.fakeEl)
+			$.fn.textWidth.fakeEl = $('<pre>').hide().appendTo(document.body);
+		
+		$.fn.textWidth.fakeEl.text(text || this.val() || this.text() || this.attr('placeholder')).css('font', font || this.css('font'));
+		
+		return $.fn.textWidth.fakeEl.width() + 10;
+	};
+	
+	$('body').on('keydown', '.edt', function(evt) {
+		if (($(this).val().length == 0 && evt.key == "Backspace") || ( this.selectionStart == 0 && evt.key == "ArrowLeft")) {
+			$(this).one('keyup', function() {
+				$(this).trigger('change');
+				editField($(this).closest(".pair").prevAll(".pair").first().find(".en").focus());
+			});
+		}
+		if (this.selectionStart == $(this).val().length && evt.key == "ArrowRight") {
+			$(this).one('keyup', function() {
+				$(this).trigger('change');
+				editField($(this).closest(".pair").nextAll(".pair").first().find(".en").focus());
+			});
+		}
+	});
+	
+	$('body').on('input', '.edt', function() {
+		if ($(this).val().slice(-1) == " ") {
+			var newVal = $(this).val().trim();				
+			$(this).val(newVal);
+			editField($(this).closest(".pair").nextAll(".pair").first().find(".en").focus());
+		} else {
+			var inputWidth = $(this).textWidth();
+			$(this).css({
+				width: inputWidth
+			});
+		}
+	}).trigger('input');
+
   </script>
   </body>
 </html>
