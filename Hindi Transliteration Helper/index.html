@@ -51,7 +51,7 @@
 <br />
 <div id="article"></div>
   </div>
-  
+    <input type="file" style="display:none" id="fileLoader" accept=".json" />
   <style>
 	.pair {
 		display: inline-block;
@@ -81,6 +81,24 @@
   </style>
 
   <script>
+  
+  function download(data, filename, type) {
+    var file = new Blob([data], {type: type});
+    if (window.navigator.msSaveOrOpenBlob) // IE10+
+        window.navigator.msSaveOrOpenBlob(file, filename);
+    else { // Others
+        var a = document.createElement("a"),
+                url = URL.createObjectURL(file);
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(function() {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);  
+        }, 0); 
+    }
+}
   var article = [];
   $(document).ready(function(){
   
@@ -113,10 +131,23 @@
 			});
 	});
 	$(".openLink").on("click", function(evt) {
-		
+		$("#fileLoader").on("change", function(evt) {
+			var theFile = $("#fileLoader")[0].files[0];
+			if (theFile.size > 0)
+			{
+				var reader = new FileReader();
+				reader.readAsText(theFile);
+				reader.onload = function() {
+					article = JSON.parse(reader.result);
+					updateArticle();
+				};
+			}
+			
+		});
+		$("#fileLoader").click();
 	});
 	$(".saveLink").on("click", function(evt) {
-		
+		download(JSON.stringify(article), "article.json");
 	});
 	
 	checked = "Y";
@@ -135,12 +166,17 @@
   });
 	
 	function loadHindi(txt) {
-		txt = txt.replace(/—/g, " —");
-		txt = txt.replace(/\n/g, " <br> ");
-		var ary = txt.split(" ");
-		var rgx = /[^\u0900-\u0963\u0965-\u097F]*/gi
-		ary.forEach(function(e,i){
-			article.push({i: i, h: e, hw: e.replace(rgx,"") , e: ""});
+		txt = txt.replace(/\n\n/g, "\n");
+		var ary1 = txt.split("\n");
+		ary1.forEach(function(par){
+			var parTmp = [];
+			var txt2 = par.replace(/—/g, " —");
+			var ary2 = txt2.split(" ");
+			var rgx = /[^\u0900-\u0963\u0965-\u097F]*/gi
+			ary2.forEach(function(e){
+				parTmp.push({h: e, hw: e.replace(rgx,"") , e: ""});
+			});
+			article.push(parTmp);
 		});
 		updateArticle();
 		$(".dlgDiv").dialog("close");
@@ -148,12 +184,10 @@
 	
 	function updateArticle() {
 		$("#article").empty();
-		$("#article").append($("<p style='display: flex; flex-wrap: wrap;'>"));
-		article.forEach(function(e){
-			if (e.h == "<br>") {
-				$("#article").append($("<p style='display: flex; flex-wrap: wrap;'>"));
-			} else {
-				$("#article").find("p").last().append(
+		article.forEach(function(par){
+			var parTemp = $("<p style='display: flex; flex-wrap: wrap;'>");
+			par.forEach(function(e){
+				parTemp.append(
 					$("<div class='pair'>")
 						.append($("<div class='hi'>").append(e.h))
 						.append($("<div class='hio'>").append(e.hw))
@@ -162,7 +196,8 @@
 								.append($("<div class='txt'>").append(e.e))
 								.append($("<input class='edt'>")))
 				);
-			}
+			});
+			$("#article").append(parTemp);
 		});
 	}
 	
@@ -184,6 +219,10 @@
 				if ($(e).find(".hio").html() == origHindi)
 					$(e).find(".txt").html(enTrns);
 			});
+			article.forEach(function(par){par.forEach(function(e) {
+				if (e.hw == origHindi)
+					e.e = enTrns;
+			});});
 		});
 		edt.trigger("input");
 	}
