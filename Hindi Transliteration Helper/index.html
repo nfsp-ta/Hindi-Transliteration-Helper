@@ -160,9 +160,6 @@
 	$(".testLink").on("click",function(evt){
 		checked = (checked == "Y" ? "N" : "Y");
 	});
-	
-	//loadHindi("हे इसराएल सुन, हमारा परमेश्‍वर यहोवा एक ही यहोवा है। तू अपने परमेश्‍वर यहोवा से पूरे दिल, पूरी जान और पूरी ताकत से प्यार करना।—व्यव. 6:4, 5.\r\n\r\n“यहोवा हमारा परमेश्‍वर है, यहोवा एक ही है।” क्या ही दमदार बात!");
-	
   });
 	
 	function loadHindi(txt) {
@@ -213,6 +210,8 @@
 		edt.select();
 		edt.one("focusout", function() {
 			var origHindi = edt.closest(".pair").find(".hio").html();
+			if (origHindi == "") 
+			    origHindi = edt.closest(".pair").find(".hi").html();
 			var enTrns = edt.val();
 			txt.html(enTrns);
 			$(".pair").each(function(i,e) {
@@ -222,7 +221,8 @@
 			article.forEach(function(par){par.forEach(function(e) {
 				if (e.hw == origHindi)
 					e.e = enTrns;
-			});});
+			});
+                    });
 		});
 		edt.trigger("input");
 	}
