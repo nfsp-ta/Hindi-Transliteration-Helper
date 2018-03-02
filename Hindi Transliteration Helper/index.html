@@ -56,7 +56,7 @@
 	.pair {
 		display: inline-block;
 		text-align: center;
-		margin: 7px 5px;
+		margin: 0.7em 0.25em;
 	}
 	.en {
 		width: 100%;
@@ -64,7 +64,7 @@
 	}
 	.hi {
 		font-size: 1.3em;
-	}	  
+	}
 	.hio {
 		display: none;
 	}
@@ -80,6 +80,10 @@
 		width: 1em;
 		border: none;
 		padding: 0;
+	}
+	@media print{
+		body {font-size: .6em;}
+		p {page-break-inside: avoid;}
 	}
   </style>
 
