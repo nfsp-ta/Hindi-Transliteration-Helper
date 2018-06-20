@@ -8,7 +8,10 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
 
-    <!-- Optional JavaScript -->
+		<!-- VueJS development version, includes helpful console warnings 
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>-->
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
@@ -49,6 +52,46 @@
   </div>
 </nav>
 <br />
+
+<script>
+	paragraphs = [
+				[
+					{word: 0},
+					{word: 1},
+					{word: 2}
+				]
+			];
+	dict = [
+			{en: 'aap', hi: 'आप'},
+			{en: 'kai-se', hi: 'कैसे'},
+			{en: 'hai', hi: 'हैं'}
+		];
+</script>
+<div id="app">
+	<p v-if="paragraphs!=null" v-for="paragraph in paragraphs" style="display: flex; flex-wrap: wrap;">
+		<span v-for="word in paragraph" class="pair">
+			<span class="hi">
+				{{dict[word.word].hi}}				
+			</span>
+			<span class="en">
+				<span class="txt">
+					{{dict[word.word].en}}
+				</span>
+				<input class="edt" />
+			</span>
+		</span>
+	</p>
+</div>
+
+<script>
+	var app = new Vue({
+		el: '#app',
+		data: {
+			paragraphs: paragraphs
+		}
+	});
+</script>
+
 <div id="article"></div>
   </div>
     <input type="file" style="display:none" id="fileLoader" accept=".json" />
@@ -59,10 +102,12 @@
 		margin: 0.7em 0.25em;
 	}
 	.en {
+		display: block;
 		width: 100%;
 		text-align: center;
 	}
 	.hi {
+		display: block;
 		font-size: 1.3em;
 	}
 	.hio {
@@ -88,7 +133,6 @@
   </style>
 
   <script>
-  
   function download(data, filename, type) {
     var file = new Blob([data], {type: type});
     if (window.navigator.msSaveOrOpenBlob) // IE10+
