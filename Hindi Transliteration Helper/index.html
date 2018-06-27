@@ -53,31 +53,17 @@
 </nav>
 <br />
 
-<script>
-	paragraphs = [
-				[
-					{word: 0},
-					{word: 1},
-					{word: 2}
-				]
-			];
-	dict = [
-			{en: 'aap', hi: 'आप'},
-			{en: 'kai-se', hi: 'कैसे'},
-			{en: 'hai', hi: 'हैं'}
-		];
-</script>
 <div id="app">
 	<p v-if="paragraphs!=null" v-for="paragraph in paragraphs" style="display: flex; flex-wrap: wrap;">
 		<span v-for="word in paragraph" class="pair">
 			<span class="hi">
-				{{dict[word.word].hi}}				
+				{{word.word}}				
 			</span>
 			<span class="en">
 				<span class="txt">
-					{{dict[word.word].en}}
+					{{dict[word.hi]}}
 				</span>
-				<input class="edt" />
+				<input class="edt" v-model.trim="dict[word.hi]" />
 			</span>
 		</span>
 	</p>
@@ -87,7 +73,18 @@
 	var app = new Vue({
 		el: '#app',
 		data: {
-			paragraphs: paragraphs
+			paragraphs: [
+				[
+					{word: 'आप', hi: 'आप'},
+					{word: 'कैसे', hi: 'कैसे'},
+					{word: 'हैं?', hi: 'हैं'}
+				]
+			],
+			dict: {
+				'आप':'aap',
+				'कैसे':'kai-se',
+				'हैं':'hai'
+			}
 		}
 	});
 </script>
@@ -114,6 +111,7 @@
 		display: none;
 	}
 	.txt {
+		display: block;
 		height: 1.25em;
 		min-height: 1.25em;
 		line-height: 1.25;
@@ -220,13 +218,14 @@
 			var parTmp = [];
 			var txt2 = par.replace(/—/g, " —");
 			var ary2 = txt2.split(" ");
-			var rgx = /[^\u0900-\u0963\u0965-\u097F]*/gi
-			ary2.forEach(function(e){
-				parTmp.push({h: e, hw: e.replace(rgx,"") , e: ""});
+			var rgx = /[^\u0900-\u0963\u0965-\u097F-]*/gi
+			ary2.forEach(function(w){
+				var hw = w.replace(rgx,"");
+				Vue.set(app.dict, hw, "");
+				parTmp.push({word: w, hi: hw});
 			});
-			article.push(parTmp);
+			app.paragraphs.push(parTmp);
 		});
-		updateArticle();
 		$(".dlgDiv").dialog("close");
 	}
 	
@@ -255,26 +254,9 @@
 		var edt = $(element).find(".edt");
 		var txt = $(element).find(".txt");
 		txt.hide();
-		edt.val(txt.html());
-		edt.show();		
+		edt.show();
 		edt.focus();
 		edt.select();
-		edt.one("focusout", function() {
-			var origHindi = edt.closest(".pair").find(".hio").html();
-			if (origHindi == "") 
-			    origHindi = edt.closest(".pair").find(".hi").html();
-			var enTrns = edt.val();
-			txt.html(enTrns);
-			$(".pair").each(function(i,e) {
-				if ($(e).find(".hio").html() == origHindi)
-					$(e).find(".txt").html(enTrns);
-			});
-			article.forEach(function(par){par.forEach(function(e) {
-				if (e.hw == origHindi)
-					e.e = enTrns;
-			});
-                    });
-		});
 		edt.trigger("input");
 	}
 	
