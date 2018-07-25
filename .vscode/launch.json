@@ -1,0 +1,24 @@
+{
+    "compounds": [{
+        "name": "Debug",
+        "configurations": ["webpack-dev-server", "Chrome"]
+    }],
+    "configurations": [{
+        "type": "node",
+        "request": "launch",
+        "name":"webpack-dev-server",
+        "program": "${workspaceFolder}/node_modules/webpack-dev-server/bin/webpack-dev-server.js",
+        "args": ["--progress", "--inline", "--config", "webpack.config.js", "--hot", "--port", "31545"]
+    },
+    { 
+        "type": "chrome", 
+        "request": "launch", 
+        "name": "Chrome", 
+        "url": "localhost:31545", 
+        "cwd": "${workspaceRoot}",
+        "webRoot": "${workspaceRoot}", 
+        "sourceMaps": true, 
+        "trace": true,
+        "port": 9222
+    }]
+}
